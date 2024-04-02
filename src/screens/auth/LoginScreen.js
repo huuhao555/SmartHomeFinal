@@ -6,40 +6,94 @@ import {
   TouchableWithoutFeedback,
   Image,
   Switch,
+  KeyboardAvoidingView,
+  ScrollView,
 } from 'react-native';
-import React, {useContext} from 'react';
+import React, {useContext, useState} from 'react';
 import {COLORS, FONTS} from '../../constants';
 import IMAGES from '../../assets/images';
 import SCREENS from '..';
 import {AppContext} from '../../theme/AppContext';
+import CustomInput from '../../components/CustomInput';
+import CustomButton from '../../components/CustomButton';
 import {useTheme} from '@react-navigation/native';
 
-const LoginScreen = props => {
-  const {navigation} = props;
+import SessionStorage from 'react-native-session-storage';
+import { apiLink } from '../../header/url';
 
-  const {isDarkTheme, setIsDarkTheme} = useContext(AppContext);
+const LoginScreen = props => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [usernameError, setUsernameError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  const onSignInPressed = async () => {
+    
+    if (!username) {
+      alert( 'Thông báo: Vui lòng nhập Email.');
+      return;
+    }
+  
+    if (!password) {
+      alert('Thông báo: Vui lòng nhập mật khẩu.');
+      return;
+    }
+    
+    try {
+      const response = await fetch( apiLink +'/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          "email": username,
+          "password": password
+        }),
+      });
+
+      if (!response.ok) {
+        Alert.alert('Thông báo',"Đăng nhập không thành công, vui lòng kiểm tra Email và Mật khẩu.");
+        return;
+      }
+      const data = await response.json();
+      console.log('Login successful:', data);//
+
+      if (data.loginUser == "Wrong password !"){
+        Alert.alert('Thông báo', "Đăng nhập không thành công, vui lòng kiểm tra Email và Mật khẩu.");
+        return;
+      }
+
+      SessionStorage.setItem('@storage_key', data.loginUser.token);
+      
+      
+      navigation.navigate(SCREENS.CONFIRMLOGIN);
+
+    } catch (error) {
+      alert("Đăng nhập không thành công, vui lòng kiểm tra Email và Mật khẩu.");
+    }
+  };
+
+ 
+  const {navigation} = props;
 
   const {colors} = useTheme();
 
   return (
-    <SafeAreaView style={{marginHorizontal: 30}}>
-      <View>
-        <Switch
-          value={isDarkTheme}
-          onChange={() => {
-            setIsDarkTheme(prev => !prev);
-          }}
-        />
-      </View>
+    <KeyboardAvoidingView
+    style={{ flex: 1 }}
+    behavior={Platform.OS === "ios" ? "padding" : null}
+    >
+      <SafeAreaView style={{marginHorizontal: 30}}>
+      <ScrollView showsVerticalScrollIndicator={false}>
       <Text
         style={{
-          marginTop: 100,
+          marginTop: 60,
           textAlign: 'center',
           fontFamily: FONTS.MONTSERRAT_BOLD,
           fontSize: 24,
           color: colors.text,
         }}>
-        Hello Again!
+        XIN CHÀO!
       </Text>
       <Text
         style={{
@@ -47,12 +101,22 @@ const LoginScreen = props => {
           fontFamily: FONTS.MONTSERRAT,
           fontSize: 20,
           marginTop: 20,
-          marginHorizontal: 70,
+          marginHorizontal: 50,
           color: colors.text,
         }}>
-        Welcome back you've been missed!
+        Chào mừng bạn đến với Smart Home 
       </Text>
-      <TextInput
+      <Image 
+        source={IMAGES.LOGO} 
+        style={{
+          width: 200, 
+          height: 200, 
+          marginLeft: 70, 
+          marginTop: 30, 
+          marginBottom: 30, 
+          borderRadius: 10,
+          }}/>
+      <CustomInput
         style={{
           backgroundColor: COLORS.WHITE,
           height: 50,
@@ -66,10 +130,13 @@ const LoginScreen = props => {
         }}
         placeholder="Email"
         placeholderTextColor={COLORS.PLACEHOLDER_COLOR}
-        cursorColor={COLORS.ORANGE}
-        selectionColor={COLORS.ORANGE}
+        cursorColor={COLORS.MAIN}
+        selectionColor={COLORS.MAIN}
+        value={username}
+        setValue={setUsername}
+        errorMessage={usernameError}
       />
-      <TextInput
+      <CustomInput
         style={{
           backgroundColor: COLORS.WHITE,
           height: 50,
@@ -78,114 +145,43 @@ const LoginScreen = props => {
           fontSize: 16,
           borderRadius: 10,
           paddingHorizontal: 20,
-          marginTop: 20,
+          marginTop: 50,
           fontFamily: FONTS.MONTSERRAT,
         }}
-        placeholder="Password"
+        placeholder="Mật khẩu"
         placeholderTextColor={COLORS.PLACEHOLDER_COLOR}
-        cursorColor={COLORS.ORANGE}
-        selectionColor={COLORS.ORANGE}
+        cursorColor={COLORS.MAIN}
+        selectionColor={COLORS.MAIN}
+        value={password}
+        setValue={setPassword}
+        secureTextEntry={true}
+        errorMessage={passwordError}
       />
-      <Text
-        style={{
-          fontFamily: FONTS.MONTSERRAT,
-          textAlign: 'right',
-          marginTop: 20,
-          color: colors.text,
-        }}>
-        Forgot Password?
-      </Text>
+      
       <TouchableWithoutFeedback
-        onPress={() => {
-          navigation.navigate(SCREENS.HOME);
-        }}>
-        <View
-          style={{
-            height: 50,
-            backgroundColor: COLORS.ORANGE,
-            marginTop: 20,
-            borderRadius: 10,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
+          onPress={() => navigation.navigate(SCREENS.FORGOTPASS)}>
           <Text
             style={{
-              fontFamily: FONTS.MONTSERRAT_SEMI_BOLD,
-              color: COLORS.WHITE,
-              fontSize: 16,
-            }}>
-            Sign In
-          </Text>
-        </View>
-      </TouchableWithoutFeedback>
-      <View
-        style={{
-          marginTop: 50,
-          flexDirection: 'row',
-          alignItems: 'center',
-        }}>
-        <View
-          style={{flex: 0.5, height: 2, backgroundColor: COLORS.GRAY_LIGHT}}
-        />
-        <Text
-          style={{
-            flex: 1,
-            textAlign: 'center',
             fontFamily: FONTS.MONTSERRAT,
-            color: colors.text,
-          }}>
-          Or continue with
-        </Text>
-        <View
-          style={{flex: 0.5, height: 2, backgroundColor: COLORS.GRAY_LIGHT}}
-        />
-      </View>
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-around',
-          marginVertical: 50,
-        }}>
-        <View
-          style={{
-            height: 70,
-            width: 100,
-            borderWidth: 3,
-            borderRadius: 10,
-            borderColor: COLORS.WHITE,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          <Image source={IMAGES.GOOGLE} style={{height: 40, width: 40}} />
-        </View>
-        <View
-          style={{
-            height: 70,
-            width: 100,
-            borderWidth: 2,
-            borderRadius: 10,
-            borderColor: COLORS.WHITE,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          <Image source={IMAGES.APPLE} style={{height: 40, width: 40}} />
-        </View>
-        <View
-          style={{
-            height: 70,
-            width: 100,
-            borderWidth: 2,
-            borderRadius: 10,
-            borderColor: COLORS.WHITE,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          <Image source={IMAGES.FACEBOOK} style={{height: 40, width: 40}} />
-        </View>
-      </View>
-      <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+            textAlign: 'right',
+            marginTop: 5,
+            marginBottom: 10,
+            marginStart: 5,
+            fontFamily: FONTS.MONTSERRAT_SEMI_BOLD,
+           
+            }}>
+            Quên mật khẩu?
+          </Text>
+        </TouchableWithoutFeedback>
+      <CustomButton 
+        onPress={onSignInPressed} 
+        bgColor={COLORS.MAIN}
+        text="Đăng nhập"
+        
+      />
+      <View style={{flexDirection: 'row', justifyContent: 'center', marginTop: 10}}>
         <Text style={{fontFamily: FONTS.MONTSERRAT_MEDIUM, color: colors.text}}>
-          Not a member?
+          Chưa có tài khoản?
         </Text>
         <TouchableWithoutFeedback
           onPress={() => navigation.navigate(SCREENS.SIGNUP)}>
@@ -193,13 +189,16 @@ const LoginScreen = props => {
             style={{
               marginStart: 5,
               fontFamily: FONTS.MONTSERRAT_SEMI_BOLD,
-              color: 'orange',
+              color: '#76D7C4',
             }}>
-            Register now
+            Đăng ký tại đây
           </Text>
         </TouchableWithoutFeedback>
       </View>
+      </ScrollView>
+      
     </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 };
 

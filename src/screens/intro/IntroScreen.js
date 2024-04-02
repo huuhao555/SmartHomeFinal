@@ -24,23 +24,23 @@ const IntroScreen = props => {
   const data = [
     {
       id: 1,
-      title: 'Browse Product',
-      image: IMAGES.BROWSE,
+      title: 'Dễ sử dụng',
+      image: IMAGES.INTRO_1,
       description:
-        'Browse by category or brand from a variety of more than 1000 products',
+        'Dễ dàng thao tác và sử dụng chỉ bằng một chạm ',
     },
     {
       id: 2,
-      title: 'Pay Seamlessly',
-      image: IMAGES.PAY,
+      title: 'Tiết kiệm',
+      image: IMAGES.INTRO_4,
       description:
-        'Pay using your preferred method including online or card payment',
+        'Tiết kiệm được chi phí và tiện lợi',
     },
     {
-      id: 2,
-      title: 'Track Order',
-      image: IMAGES.TRACK,
-      description: 'Track your order from the warehouse to your doorstep',
+      id: 3,
+      title: 'Tối ưu',
+      image: IMAGES.INTRO_5,
+      description: 'Ứng dụng tối ưu và tiết kiệm tối đa thời gian ',
     },
   ];
 
@@ -73,9 +73,10 @@ const IntroScreen = props => {
 
   return (
     <SafeAreaView style={{flex: 1, justifyContent: 'space-between'}}>
-      <View style={{alignItems: 'flex-end', padding: 15}}>
+      <View style={{alignItems: 'flex-end', padding: 15, }}>
         <Button
-          title="Skip"
+          color={'#000'}
+          title="Bỏ qua"
           onPress={() => {
             navigation.navigate(SCREENS.LOGIN);
           }}
@@ -95,8 +96,8 @@ const IntroScreen = props => {
           activeDotIndex={activeDotIndex}
           dotsLength={3}
           dotStyle={{
-            width: 15,
-            backgroundColor: COLORS.ORANGE,
+            width: 20,
+            backgroundColor: COLORS.MAIN,
           }}
           inactiveDotStyle={{
             width: 10,
@@ -134,7 +135,7 @@ const IntroScreen = props => {
                 height: 50,
                 width: 50,
                 borderRadius: 25,
-                backgroundColor: COLORS.ORANGE,
+                backgroundColor: COLORS.MAIN,
                 justifyContent: 'center',
                 alignItems: 'center',
               }}>
